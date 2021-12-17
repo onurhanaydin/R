@@ -1,0 +1,80 @@
+rm(list=ls())
+library(fields)
+library(ncdf4)
+library(maps)
+library(viridis)
+library(RColorBrewer)
+
+###   Open the NectCDF of the SPEEDY MODEL   ###
+
+ncs_zero<-nc_open("attm110m.nc")
+pre_zero_ls<-ncvar_get(ncs_zero,"precls")
+pre_zero_cnv<-ncvar_get(ncs_zero,"precnv")
+pre_zero_speedy<-pre_zero_ls+pre_zero_cnv
+pre_zero_speedy_spatialmean<-apply(pre_zero_speedy,c(3),mean,na.rm=T)
+
+######
+
+ncs_one<-nc_open("attm111m.nc")
+pre_one_ls<-ncvar_get(ncs_one,"precls")
+pre_one_cnv<-ncvar_get(ncs_one,"precnv")
+pre_one_speedy<-pre_one_ls+pre_one_cnv
+pre_one_speedy_spatialmean<-apply(pre_one_speedy,c(3),mean,na.rm=T)
+
+######
+
+ncs_two<-nc_open("attm112m.nc")
+pre_two_ls<-ncvar_get(ncs_two,"precls")
+pre_two_cnv<-ncvar_get(ncs_two,"precnv")
+pre_two_speedy<-pre_two_ls+pre_two_cnv
+pre_two_speedy_spatialmean<-apply(pre_two_speedy,c(3),mean,na.rm=T)
+
+######
+
+ncs_three<-nc_open("attm113m.nc")
+pre_three_ls<-ncvar_get(ncs_three,"precls")
+pre_three_cnv<-ncvar_get(ncs_three,"precnv")
+pre_three_speedy<-pre_three_ls+pre_three_cnv
+pre_three_speedy_spatialmean<-apply(pre_three_speedy,c(3),mean,na.rm=T)
+
+######
+
+ncs_four<-nc_open("attm114m.nc")
+pre_four_ls<-ncvar_get(ncs_four,"precls")
+pre_four_cnv<-ncvar_get(ncs_four,"precnv")
+pre_four_speedy<-pre_four_ls+pre_four_cnv
+pre_four_speedy_spatialmean<-apply(pre_four_speedy,c(3),mean,na.rm=T)
+
+
+######    Open the Observations ###### 
+
+nco<-nc_open("mprecipmonremap.nc")
+pre_OBS<-ncvar_get(nco,"precip")
+pre_OBS_spatialmean<-apply(pre_OBS,c(3),mean,na.rm=T)
+
+############   Colors for the Templete  ######
+
+year <- seq(1,120,1)
+
+##########
+
+x11(width=14,height=8)
+
+####    Plotting SPEEDY  ####
+
+plot(year,pre_OBS_spatialmean,type="l",ylim=c(3,4.5),lwd=3.5,ylab="Precipitation (mm/day)",xlab = "TIME", cex.lab=1.45, cex.axis=1.45, main="SPEEDYs & OBS")
+
+lines(year, pre_zero_speedy_spatialmean, type="l", lwd=3.5, col="red")
+
+lines(year, pre_one_speedy_spatialmean, type="l", lwd=3.5, col="greenyellow")
+
+lines(year, pre_two_speedy_spatialmean, type="l", lwd=3.5, col="cyan1")
+
+lines(year, pre_three_speedy_spatialmean, type="l", lwd=3.5, col="mediumorchid1")
+
+lines(year, pre_four_speedy_spatialmean, type="l", lwd=3.5, col="goldenrod1")
+
+
+###    Plotting the Standard deviation  of the 2m temperature
+
+legend("topright",legend=c("OBSERVATION","110","111","112","113","114"),col=c("black","red","greenyellow","cyan1","mediumorchid1","goldenrod1"),bty="n",cex=1.45,lwd=c(2.5,2.5))

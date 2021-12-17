@@ -1,0 +1,86 @@
+rm(list=ls())
+library(fields)
+library(ncdf4)
+library(maps)
+library(viridis)
+library(RColorBrewer)
+
+###   Open the NectCDF of the SPEEDY MODEL   ###
+
+ncs<-nc_open(“infile_r360x180_mask_ocean.nc")
+temp_speedy<-ncvar_get(ncs,"temp0")
+
+temp_speedy_spatialmean<-apply(temp_speedy,c(3),mean,na.rm=T)
+
+######  Read Lat & ncLon ######  
+
+lx<-ncvar_get(ncs,"lon")
+ly<-ncvar_get(ncs,"lat")
+
+######    Open the Observations ###### 
+
+nco<-nc_open(“OBS.nc")
+temp_OBS<-ncvar_get(nco,"tmp")
+temp_OBS[which(temp_OBS==-99.9)]<-NA
+temp_OBS_spatialmean<-apply(temp_OBS,c(3),mean,na.rm=T)
+temp_OBS_spatialmean<-temp_OBS_spatialmean+273
+
+######   FOR EUROPE  ######
+
+ncse<-nc_open(“eurinfile_r360x180_mask_ocean.nc")
+temp_speedy_EUR<-ncvar_get(ncse,"temp0")
+temp_speedy_spatialmean_EUR<-apply(temp_speedy_EUR,c(3),mean,na.rm=T)
+
+######  Read Lat & Lon ###### 
+
+lx<-ncvar_get(ncse,"lon")
+ly<-ncvar_get(ncse,"lat")
+
+######    Open the NetCDF of the Observations 
+
+ncoe<-nc_open(“OBSEUR.nc")
+temp_OBS_EUR<-ncvar_get(ncoe,"tmp")
+temp_OBS_EUR[which(temp_OBS_EUR==-99.9)]<-NA
+temp_OBS_spatialmean_EUR<-apply(temp_OBS_EUR,c(3),mean,na.rm=T)
+temp_OBS_spatialmean_EUR<-temp_OBS_spatialmean_EUR+273
+
+############   Colors for the Templete  ######
+
+year <- seq(1,96,1)
+
+############    Plot the ftwo figures ar the same time #### 
+
+x11(width=14,height=8)
+par(mfrow=c(2,2),mar=c(4,4,4,4))
+par(oma=c(3,3,1,1))
+
+####    Plotting SPEEDY  ####
+
+plot(year,temp_speedy_spatialmean,type="l",ylim=c(250,300),ylab = 'Air Temperature (K)', xlab = 'TIME',cex.lab=1.45,cex.axis=1.45,main="T_2M (GLOBE)",col="red")
+
+lines(year,temp_OBS_spatialmean,type="l",ylim=c(250,285),ylab = 'Air Temperature (K)', xlab = 'TIME',cex.lab=1.45,cex.axis=1.45,main="SPEEDY")
+
+
+###    Plotting the Standard devaiation  of the 2m temperature
+
+legend("topright",legend=c("OBSERVATION","SPEEDY"),col=c("black","red"),lty=c(1,1),bty="n",cex=1.45,lwd=c(2.5,2.5))
+
+boxplot(temp_speedy_spatialmean, temp_OBS_spatialmean,main="T_2M (GLOBE)",col=c("red","white"), names=c("SPEEDY","OBS"),ylab="Air Temperatures(K)",cex.lab=1.45,cex.axis="1.45",ylim=c(250,300))
+
+########################################
+
+
+plot(year,temp_speedy_spatialmean_EUR,type="l",ylim=c(250,300),ylab = 'Air Temperatures (K)', xlab = 'TIME',cex.lab=1.45,cex.axis=1.45,main="T_2M (EUROPE)",col="red")
+
+
+lines(year,temp_OBS_spatialmean_EUR,type="l",ylim=c(250,285),ylab = 'Air Temperature (K)', xlab = 'TIME',cex.lab=1.45,cex.axis=1.45,main="SPEEDY")
+
+
+###    Plotting the Standard devaiation  of the 2m temperature
+
+legend("topright",legend=c("OBSERVATION","SPEEDY"),col=c("black","red"),lty=c(1,1),bty="n",cex=1.45,lwd=c(2.5,2.5))
+
+boxplot(temp_speedy_spatialmean_EUR, temp_OBS_spatialmean_EUR,main="T_2M (EUROPE)",col=c("red","white"), names=c("SPEEDY","OBS"),ylab="Air Temperatures(K)",cex.lab=1.45,cex.axis="1.45",ylim=c(250,300))
+
+
+dev.print(pdf,’final.pdf',width=14,height=8)
